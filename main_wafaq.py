@@ -36,33 +36,36 @@ def log():
 
 # set up root route
 @app.route("/query", methods=['POST'])
-def aris():
-  global logger
-  
-  logger.debug("/query POST")
-  query = request.args.get('query')  
-  logger.debug("QueryInfo: " + type(query))
-  if not (type(query) is str):
-      logger.debug("QueryError: " + query)
-      return {'message': 'Invalid query input'}, 400  # Return a success response
-  else:
-      logger.info("Query: " + query)
-      
-  # logger.info("NAME: " + return_name )
-  response_data = [
-      {
-       'intent': 'intent string',
-       'text':  'text string',
-       'confidence' : 0.6
-      },
-      {
-       'intent': 'intent string2',
-       'text':  'text string2',
-       'confidence' : 0.7
-      }
-  ]
-  logger.debug("/query return")
-  return jsonify(response_data)
+def query_api():
+  try:
+      global logger      
+      logger.debug("/query POST")
+      request_data = request.get_json()
+      if 'query' not in request_data:
+          logger.error("Query: missing query parameter")
+          return jsonify({"error": "Missing 'query' parameter"}), 400
+      query = request_data['query']
+      if not (type(query) is str):
+          logger.error("Query: Wrong parameter type: " + type(query))
+          return jsonify({"error": "Wrong 'query' parameter type"}), 400
+      else:
+          logger.info("Query: parameter: " + query)
+      response_data = [
+          {
+           'intent': 'intent string',
+           'text':  'text string',
+           'confidence' : 0.6
+          },
+          {
+           'intent': 'intent string2',
+           'text':  'text string2',
+           'confidence' : 0.7
+          }
+      ]
+      logger.debug("/query return")
+      return jsonify(response_data)
+  except Exception as e:
+      return jsonify({"error": str(e)}), 400
 
 # Configure logging with a custom log message format
 logging.basicConfig(
