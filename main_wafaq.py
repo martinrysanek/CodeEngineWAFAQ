@@ -43,7 +43,38 @@ def wa_login():
         session = assistant.create_session(assistant_id).get_result()
         session_id=session['session_id']
         logger.debug("wa_login() new wa session " + session_id)
-        
+
+def get_intent_text(intent_text):
+      global logger  
+      global assistant_id
+      global session_id  
+      global assistant
+      
+      result = assistant.message(
+          assistant_id=assistant_id,
+          session_id=session_id,
+          input={
+              'message_type': 'text',
+              'text': '*',
+              "intents": [
+                  {
+                      "intent": intent_text,
+                      "confidence": 1
+                  }
+              ]
+          }
+      )
+      if result.status_code == 200:
+          response = result.get_result()
+          if 'generic' in response['output']:
+              #It is not random way to return text, for random need to be adjusted !!!
+              return (response['output']['generic'][0]['text'])
+          else:
+              logger.error("get_intent_text: Return json does not include generic and text")
+              return ("Error: get_intent_text: Return json does not include generic and text")
+      else:
+          logger.error("get_intent_text: Wa did not get text for intent")
+          return ("Error: get_intent_text: Wa did not get text for intent")
 
 # set up root route
 @app.route("/log", methods=['GET'])
@@ -95,30 +126,23 @@ def query_api():
       if result.status_code == 200 and 'intents' in response["output"]:
           response_data = []
           intents = response["output"]['intents']
+          count = 0
+          #Max number of return intent (it could 5 also)
+          countMax = 3
           for intent in intents:
-              logger.info("Query: intent " + intent['intent'])
-              new_item = {
-                  'intent': intent['intent'],
-                  'text':  'text',
-                  'confidence' : intent['confidence']
-              }
-              response_data.append(new_item)
+              count+=1
+              if count<countMax: 
+                  logger.info("Query: intent " + intent['intent'])
+                  new_item = {
+                      'intent': intent['intent'],
+                      'text':  'text',
+                      'confidence' : intent['confidence']
+                  }
+                  response_data.append(new_item)
       else:
           logger.error("Query: Wa reponded with error")
           return jsonify({"error": "Wa reponded with error"}), 400    
-      
-      # response_data = [
-      #     {
-      #      'intent': 'intent string',
-      #      'text':  'text string',
-      #      'confidence' : 0.6
-      #     },
-      #     {
-      #      'intent': 'intent string2',
-      #      'text':  'text string2',
-      #      'confidence' : 0.7
-      #     }
-      # ]
+
       logger.debug("/query return")
       return jsonify(response_data)
   except Exception as e:
