@@ -1,1 +1,4 @@
 Flask
+ibm_watson
+ibm-cloud-sdk-core
+
