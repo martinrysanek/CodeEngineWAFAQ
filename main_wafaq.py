@@ -25,22 +25,6 @@ class CustomFormatter(logging.Formatter):
         custom_format = f"[{timestamp}] [{record.levelname}]: {record.getMessage()} <BR>"
         return custom_format
 
-# Function to traverse the entire XML tree and display attributes of a given tag name
-def find_and_display_attributes(element, tag_name):
-    if element.tag.endswith(tag_name):
-        text = element.text
-        if text:
-            # print(f"{tag_name} text: {text}")                
-            return text
-        else:
-            return "Unknown"
-    for child in element:
-        name = find_and_display_attributes(child, tag_name)  
-        if name != "Unknown":
-            return name
-    return "Unknown"
-
-
 # set up root route
 @app.route("/log", methods=['GET'])
 def log():
@@ -51,28 +35,32 @@ def log():
     return (html_in + string_handler.log_output + html_out)
 
 # set up root route
-@app.route("/", methods=['GET'])
+@app.route("/query", methods=['POST'])
 def aris():
   global logger
   
-  logger.debug("GET /")
-  # url = 'https://wwwinfo.mfcr.cz/cgi-bin/ares/darv_bas.cgi?ico=14890992'
-  url = 'https://wwwinfo.mfcr.cz/cgi-bin/ares/darv_bas.cgi?ico='
+  logger.debug("/query POST")
   
-  ico_string = request.args.get('ico')  
-  if not (type(ico_string) is str and ico_string.isdigit()):
-      return_name = "Not valid ICO format"
+  query = request.args.get('query')  
+  if not (type(query) is str):
+      return {'message': 'Invalid query input'}, 400  # Return a success response
   else:
-      logger.info("ICO: " + ico_string)
-      response = urllib.request.urlopen(url+ico_string.strip())
-      data = response.read()
-      # Parse the XML string
-      root = ET.fromstring(data)
-      # Example: Display all attributes for the 'person' tag throughout the XML tree
-      return_name = find_and_display_attributes(root, 'OF')
+      logger.info("Query: " + query)
       
-  logger.info("NAME: " + return_name )
-  response_data = {'name': return_name }
+  # logger.info("NAME: " + return_name )
+  response_data = [
+      {
+       'intent': 'intent string',
+       'text':  'text string',
+       'confidence' : 0.6
+      },
+      {
+       'intent': 'intent string2',
+       'text':  'text string2',
+       'confidence' : 0.7
+      }
+  ]
+  logger.debug("/query return")
   return jsonify(response_data)
 
 # Configure logging with a custom log message format
