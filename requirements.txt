@@ -1,5 +1,2 @@
 Flask
 ElementTree
-ibm_watson
-ibm-cloud-sdk-core
-
