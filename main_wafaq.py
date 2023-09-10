@@ -130,7 +130,7 @@ def query_api():
           count = 0
           for intent in intents:
               count+=1
-              if count<=max_count: 
+              if count<=max_intents: 
                   logger.info("Query: intent " + intent['intent'])
                   new_item = {
                       'intent': intent['intent'],
@@ -181,9 +181,9 @@ assistant_id = os.getenv('ASSISTANT_ID', 'None')
 logger.debug("ASSISTANT_ID = " + assistant_id)
 
 # Max Returned Intents
-max_count_str = os.getenv('MAX_INTENTS', '5')
-max_count = int(max_count_str)
-logger.debug("MAX_COUNT = " + max_count)
+max_intents_str = os.getenv('MAX_INTENTS', '5')
+max_intents = int(max_intents_str)
+logger.debug("MAX_INTENTS = " + str(max_intents))
 
 authenticator = None
 assistant = None
