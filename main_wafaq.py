@@ -93,6 +93,7 @@ def query_api():
       global assistant_id
       global session_id  
       global assistant
+      global max_count 
       
       logger.debug("/query POST")
       request_data = request.get_json()
@@ -127,11 +128,9 @@ def query_api():
           response_data = []
           intents = response["output"]['intents']
           count = 0
-          #Max number of return intent (it could 5 also)
-          countMax = 3
           for intent in intents:
               count+=1
-              if count<countMax: 
+              if count<=max_count: 
                   logger.info("Query: intent " + intent['intent'])
                   new_item = {
                       'intent': intent['intent'],
@@ -180,6 +179,11 @@ logger.debug("WA_URL = " + wa_url)
 # Get assistant_id
 assistant_id = os.getenv('ASSISTANT_ID', 'None')
 logger.debug("ASSISTANT_ID = " + assistant_id)
+
+# Max Returned Intents
+max_count_str = os.getenv('MAX_INTENTS', '5')
+max_count = int(max_count_str)
+logger.debug("MAX_COUNT = " + max_count)
 
 authenticator = None
 assistant = None
