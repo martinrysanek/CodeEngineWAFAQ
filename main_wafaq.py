@@ -40,8 +40,8 @@ def aris():
   global logger
   
   logger.debug("/query POST")
-  
   query = request.args.get('query')  
+  logger.debug("QueryInfo: " + type(query))
   if not (type(query) is str):
       logger.debug("QueryError: " + query)
       return {'message': 'Invalid query input'}, 400  # Return a success response
