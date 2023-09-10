@@ -130,11 +130,15 @@ def query_api():
           count = 0
           for intent in intents:
               count+=1
-              if count<=max_intents: 
-                  logger.info("Query: intent " + intent['intent'])
+              if count<=max_intents:
+                  intent_text = intent['intent']
+                  if intent_text.startswith("fallback"):
+                      continue
+                  logger.info("Query: intent " + intent_text)
+                  out_text = get_intent_text(intent_text)
                   new_item = {
-                      'intent': intent['intent'],
-                      'text':  'text',
+                      'intent': intent_text,
+                      'text':  out_text,
                       'confidence' : intent['confidence']
                   }
                   response_data.append(new_item)
