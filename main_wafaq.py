@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+from ibm_watson import AssistantV2
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 import xml.etree.ElementTree as ET
 import urllib.request
 import os
