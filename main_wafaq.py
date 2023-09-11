@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from ibm_watson import AssistantV2
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+import datetime
 import xml.etree.ElementTree as ET
 import urllib.request
 import os
@@ -151,6 +152,47 @@ def query_api():
   except Exception as e:
       return jsonify({"error": str(e)}), 400
 
+
+# set up root route
+@app.route("/selection", methods=['POST'])
+def selection_api():
+    global logger  
+    global selection_log
+    try:
+      logger.debug("/selection POST")        
+      request_data = request.get_json()
+      if 'query' not in request_data:
+          logger.error("Selection: missing query parameter")
+          return jsonify({"error": "Missing 'query' parameter"}), 400    
+      else:
+          query = request_data['query']
+      if 'selected_name' not in request_data:
+          logger.error("Selection: missing selected_name parameter")
+          return jsonify({"error": "Missing 'selected_name' parameter"}), 400  
+      else:
+          selected_name = request_data['selected_name']
+      if 'selected_confidence' not in request_data:
+          logger.error("Selection: missing selected_confidence parameter")
+          return jsonify({"error": "Missing 'selected_confidence' parameter"}), 400 
+      else:
+          selected_confidence = float(request_data['selected_confidence'])
+      if 'top_name' in request_data:
+          top_name = request_data['top_name']
+      else:
+          top_name = ""
+      if 'top_confidence' in request_data:
+          top_confidence = float(request_data['top_confidence'])
+      else:
+          top_confidence = -1   
+      
+      current_datetime = datetime.datetime.now()
+      formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+      
+      selection_log += "{}, {}, {}, {:.3f}, {}, {:.3f}\n".format(formatted_datetime, query, selected_name, selected_confidence, top_name, top_confidence)
+      return
+    except Exception as e:
+      return jsonify({"error": str(e)}), 400
+
 # Configure logging with a custom log message format
 logging.basicConfig(
     level=logging.DEBUG,  # Set the minimum log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -189,6 +231,10 @@ max_intents_str = os.getenv('MAX_INTENTS', '5')
 max_intents = int(max_intents_str)
 logger.debug("MAX_INTENTS = " + str(max_intents))
 
+# Initiate Selection Log
+selection_log =""
+
+# Initiate WA connection
 authenticator = None
 assistant = None
 
