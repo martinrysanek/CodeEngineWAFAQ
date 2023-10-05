@@ -155,6 +155,7 @@ def query_api():
                   if e.code == 404:
                      authenticator = None
                      continue
+              authenticator = None
               return jsonify({"error": str(e)}), 400
   except Exception as e:
       return jsonify({"error": str(e)}), 400
