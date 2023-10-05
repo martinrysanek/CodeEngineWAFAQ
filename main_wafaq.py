@@ -44,6 +44,24 @@ def wa_login():
         session = assistant.create_session(assistant_id).get_result()
         session_id=session['session_id']
         logger.debug("wa_login() new wa session " + session_id)
+    else:
+        #Try query session
+        logger.debug("wa_login() trying existing session")
+        result = assistant.message(
+          assistant_id=assistant_id,
+          session_id=session_id,
+        )
+        if result.status_code == 404:
+            logger.debug("wa_login() new session required")
+            authenticator = IAMAuthenticator(api_key)
+            assistant = AssistantV2(
+                version='2021-11-27',
+                authenticator=authenticator)
+            assistant.set_service_url(wa_url)
+            session = assistant.create_session(assistant_id).get_result()
+            session_id=session['session_id']
+            logger.debug("wa_login() renewed wa session " + session_id)
+        
 
 def get_intent_text(intent_text):
       global logger  
