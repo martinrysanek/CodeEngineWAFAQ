@@ -198,14 +198,15 @@ def selection_api():
       formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
       
       selection_log += "{}, {}, {}, {:.3f}, {}, {:.3f}\n".format(formatted_datetime, query, selected_name, selected_confidence, top_name, top_confidence)
+      logger.debug("/selection return") 
       return
     except Exception as e:
       return jsonify({"error": str(e)}), 400
 
 # set up root route
 @app.route("/selection_log", methods=['GET'])
-def log():
-    global string_handler
+def selection_web():
+    global selection_log
     # Retrieve the log messages as a single string
     html_in = "<HTML><BODY>"
     html_out = "</BODY></HTML>"
