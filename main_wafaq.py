@@ -198,9 +198,9 @@ def selection_api():
       current_datetime = datetime.datetime.now()
       formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
       
-      selection_log += "{}, {}, {}, {:.3f}, {}, {:.3f}\n".format(formatted_datetime, query, selected_name, selected_confidence, top_name, top_confidence)
+      selection_log += "{}, {}, {}, {:.3f}, {}, {:.3f}<BR>".format(formatted_datetime, query, selected_name, selected_confidence, top_name, top_confidence)
       logger.debug("/selection return") 
-      return
+      return 200
     except Exception as e:
       return jsonify({"error": str(e)}), 400
 
