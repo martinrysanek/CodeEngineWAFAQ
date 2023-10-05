@@ -185,7 +185,7 @@ def selection_api():
           return jsonify({"error": "Missing 'selected_confidence' parameter"}), 400 
       else:
           selected_confidence = request_data['selected_confidence']
-          logger.info("Selection confidence: " + selected_confidence)          
+          logger.info("Selection confidence: " + str(selected_confidence))          
       if 'top_name' in request_data:
           top_name = request_data['top_name']
       else:
