@@ -34,34 +34,15 @@ def wa_login():
     global api_key
     global wa_url
 
-    if not authenticator:    
-        logger.debug("wa_login() new wa session start")
-        authenticator = IAMAuthenticator(api_key)
-        assistant = AssistantV2(
-            version='2021-11-27',
-            authenticator=authenticator)
-        assistant.set_service_url(wa_url)
-        session = assistant.create_session(assistant_id).get_result()
-        session_id=session['session_id']
-        logger.debug("wa_login() new wa session " + session_id)
-    else:
-        #Try query session
-        logger.debug("wa_login() trying existing session")
-        result = assistant.message(
-          assistant_id=assistant_id,
-          session_id=session_id,
-        )
-        if result.status_code == 404:
-            logger.debug("wa_login() new session required")
-            authenticator = IAMAuthenticator(api_key)
-            assistant = AssistantV2(
-                version='2021-11-27',
-                authenticator=authenticator)
-            assistant.set_service_url(wa_url)
-            session = assistant.create_session(assistant_id).get_result()
-            session_id=session['session_id']
-            logger.debug("wa_login() renewed wa session " + session_id)
-        
+    logger.debug("wa_login() new wa session start")
+    authenticator = IAMAuthenticator(api_key)
+    assistant = AssistantV2(
+        version='2021-11-27',
+        authenticator=authenticator)
+    assistant.set_service_url(wa_url)
+    session = assistant.create_session(assistant_id).get_result()
+    session_id=session['session_id']
+    logger.debug("wa_login() new wa session " + session_id)
 
 def get_intent_text(intent_text):
       global logger  
@@ -113,6 +94,7 @@ def query_api():
       global session_id  
       global assistant
       global max_count 
+      global authenticator
       
       logger.debug("/query POST")
       request_data = request.get_json()
@@ -127,49 +109,55 @@ def query_api():
           logger.info("Query: parameter: " + query)
           
       #Create WA session if it is not opened yet
-      wa_login()
-      
-      #Get Intents for Query
-      result = assistant.message(
-        assistant_id=assistant_id,
-        session_id=session_id,
-        input={
-            'message_type': 'text',
-            'text': query,
-            "options": {
-            "alternate_intents": True        
-            }
-        }
-      )
-      response = result.get_result()
-      
-      if result.status_code == 200 and 'intents' in response["output"]:
-          response_data = []
-          intents = response["output"]['intents']
-          count = 0
-          for intent in intents:
-              count+=1
-              if count<=max_intents:
-                  intent_text = intent['intent']
-                  if intent_text.startswith("fallback"):
-                      continue
-                  logger.info("Query: intent " + intent_text)
-                  out_text = get_intent_text(intent_text)
-                  new_item = {
-                      'intent': intent_text,
-                      'text':  out_text,
-                      'confidence' : intent['confidence']
-                  }
-                  response_data.append(new_item)
-      else:
-          logger.error("Query: Wa reponded with error")
-          return jsonify({"error": "Wa reponded with error"}), 400    
 
-      logger.debug("/query return")
-      return jsonify(response_data)
+      while (True):
+          try:
+                if not authenticator:
+                    wa_login()
+                #Get Intents for Query
+                result = assistant.message(
+                  assistant_id=assistant_id,
+                  session_id=session_id,
+                  input={
+                      'message_type': 'text',
+                      'text': query,
+                      "options": {
+                      "alternate_intents": True        
+                      }
+                  }
+                )
+                response = result.get_result()
+                if result.status_code == 200 and 'intents' in response["output"]:
+                    response_data = []
+                    intents = response["output"]['intents']
+                    count = 0
+                    for intent in intents:
+                        count+=1
+                        if count<=max_intents:
+                            intent_text = intent['intent']
+                            if intent_text.startswith("fallback"):
+                                continue
+                            logger.info("Query: intent " + intent_text)
+                            out_text = get_intent_text(intent_text)
+                            new_item = {
+                                'intent': intent_text,
+                                'text':  out_text,
+                                'confidence' : intent['confidence']
+                            }
+                            response_data.append(new_item)          
+                    logger.debug("/query return")
+                    return jsonify(response_data)
+                else:
+                    logger.error("Query: Wa reponded with error")
+                    return jsonify({"error": "Wa reponded with error"}), 400    
+          except Exception as e:
+              if hasattr(e, "code"):
+                  if e.code == 404:
+                     authenticator = None
+                     continue
+              return jsonify({"error": str(e)}), 400
   except Exception as e:
       return jsonify({"error": str(e)}), 400
-
 
 # set up root route
 @app.route("/selection", methods=['POST'])
