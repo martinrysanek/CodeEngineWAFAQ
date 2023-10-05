@@ -172,16 +172,19 @@ def selection_api():
           return jsonify({"error": "Missing 'query' parameter"}), 400    
       else:
           query = request_data['query']
+          logger.info("Selection query: " + query)
       if 'selected_name' not in request_data:
           logger.error("Selection: missing selected_name parameter")
           return jsonify({"error": "Missing 'selected_name' parameter"}), 400  
       else:
           selected_name = request_data['selected_name']
+          logger.info("Selection selected: " + selected_name)          
       if 'selected_confidence' not in request_data:
           logger.error("Selection: missing selected_confidence parameter")
           return jsonify({"error": "Missing 'selected_confidence' parameter"}), 400 
       else:
           selected_confidence = float(request_data['selected_confidence'])
+          logger.info("Selection confidence: " + selected_confidence)          
       if 'top_name' in request_data:
           top_name = request_data['top_name']
       else:
@@ -198,6 +201,15 @@ def selection_api():
       return
     except Exception as e:
       return jsonify({"error": str(e)}), 400
+
+# set up root route
+@app.route("/selection_log", methods=['GET'])
+def log():
+    global string_handler
+    # Retrieve the log messages as a single string
+    html_in = "<HTML><BODY>"
+    html_out = "</BODY></HTML>"
+    return (html_in + selection_log + html_out)
 
 # Configure logging with a custom log message format
 logging.basicConfig(
