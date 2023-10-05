@@ -184,14 +184,14 @@ def selection_api():
           logger.error("Selection: missing selected_confidence parameter")
           return jsonify({"error": "Missing 'selected_confidence' parameter"}), 400 
       else:
-          selected_confidence = float(request_data['selected_confidence'])
+          selected_confidence = request_data['selected_confidence']
           logger.info("Selection confidence: " + selected_confidence)          
       if 'top_name' in request_data:
           top_name = request_data['top_name']
       else:
           top_name = ""
       if 'top_confidence' in request_data:
-          top_confidence = float(request_data['top_confidence'])
+          top_confidence = request_data['top_confidence']
       else:
           top_confidence = -1   
       
