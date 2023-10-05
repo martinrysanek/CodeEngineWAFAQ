@@ -200,7 +200,7 @@ def selection_api():
       
       selection_log += "{}, {}, {}, {:.3f}, {}, {:.3f}<BR>".format(formatted_datetime, query, selected_name, selected_confidence, top_name, top_confidence)
       logger.debug("/selection return") 
-      return 200
+      return '',200
     except Exception as e:
       return jsonify({"error": str(e)}), 400
 
