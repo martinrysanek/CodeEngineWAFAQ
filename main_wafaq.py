@@ -24,6 +24,12 @@ table_border_style="""
         padding-left: 12px; /* Left padding for data cells */
         padding-right: 12px; /* Right padding for data cells */        
     }
+    .grey-text {
+        color: #aaaaaa;
+    }   
+    .red-text {
+        color: red;
+    }    
 </style>
 """
 
@@ -66,7 +72,12 @@ class LoggerClass:
             while indent >0:
                 message = "&nbsp;&nbsp;&nbsp;&nbsp;" + message
                 indent -= 1
-            html_table += f'<tr><td>{datetime_str}</td><td>{level}</td><td>{message}</td></tr>'
+            if level == "info":
+                html_table += f'<tr><td>{datetime_str}</td><td>{level}</td><td class="grey-text">{message}</td></tr>'
+            elif level == "error":
+                html_table += f'<tr><td>{datetime_str}</td><td>{level}</td><td class="red-text">{message}</td></tr>'
+            else:
+                html_table += f'<tr><td>{datetime_str}</td><td>{level}</td><td>{message}</td></tr>'
         html_table += '</table>'
         return html_table    
 
