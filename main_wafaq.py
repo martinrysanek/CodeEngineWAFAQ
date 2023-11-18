@@ -11,18 +11,26 @@ app = Flask(__name__)
 table_border_style="""
 <style>
     /* CSS styles */
+    h1    {
+        font-family: 'Inter', sans-serif;
+    }
+    body  {
+        font-family: 'Inter', sans-serif;    
+    }
     table {
         border-collapse: collapse;
         border: 1px solid #ddd; /* Apply border to the whole table */
+        font-family: 'Inter', sans-serif;
     }
 
     th, td {
         border: 1px solid #ddd; /* Apply border to cells */
-        padding-top: 0;
-        padding-bottom: 0;
+        padding-top: 1;
+        padding-bottom: 1;
         text-align: left;
         padding-left: 12px; /* Left padding for data cells */
         padding-right: 12px; /* Right padding for data cells */        
+        font-family: 'Inter', sans-serif;
     }
     .grey-text {
         color: #aaaaaa;
@@ -34,7 +42,7 @@ table_border_style="""
 """
 
 menu_html="""
-<h1>WA FAQ Extension</h1>
+<h1>Watson Assistant FAQ Extension</h1>
 <button onclick="window.location.href = '/selection_log'">&nbsp;Faq Selections&nbsp;</button>&nbsp;&nbsp;
 <button onclick="window.location.href = '/log'">&nbsp;Faq Logs&nbsp;</button>&nbsp;&nbsp;
 <button onclick="window.location.href = '/config'">&nbsp;Faq Config&nbsp;</button>
@@ -290,7 +298,7 @@ def selection_web():
 def config_web():
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
-    return (html_in + "THERE IS CONFIG INFO" + html_out)
+    return (html_in + "MAX_INTENTS = " + str(max_intents) + html_out)
 
 @app.route("/kill", methods=['GET'])
 def terminate_flask_server():
