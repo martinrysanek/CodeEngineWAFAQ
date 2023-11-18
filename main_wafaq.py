@@ -29,9 +29,10 @@ table_border_style="""
 
 menu_html="""
 <h1>WA FAQ Extension</h1>
-<button onclick="window.location.href = '/selection'">Faq Selections</button>
-<button onclick="window.location.href = '/log'">Faq Logs</button>
-<p>&nbsp;</p>
+<button onclick="window.location.href = '/selection_log'">&nbsp;Faq Selections&nbsp;</button>&nbsp;&nbsp;
+<button onclick="window.location.href = '/log'">&nbsp;Faq Logs&nbsp;</button>&nbsp;&nbsp;
+<button onclick="window.location.href = '/config'">&nbsp;Faq Config&nbsp;</button>
+<br><br>
 """
 
 class LoggerClass:
@@ -259,7 +260,7 @@ def selection_api():
 
 # set up root route
 @app.route("/log", methods=['GET'])
-def log_api():
+def log_web():
     global logger
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
@@ -272,6 +273,13 @@ def selection_web():
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
     return (html_in + selection_log.generate_html_table() + html_out)
+
+# set up root route
+@app.route("/config", methods=['GET'])
+def config_web():
+    html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
+    html_out = "</BODY></HTML>"
+    return (html_in + "THERE IS CONFIG INFO" + html_out)
 
 @app.route("/kill", methods=['GET'])
 def terminate_flask_server():
@@ -303,5 +311,3 @@ assistant = None
 
 if __name__ == "__main__":
 	app.run(host='0.0.0.0',port=int(port))
-
-
