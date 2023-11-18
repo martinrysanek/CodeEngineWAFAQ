@@ -294,6 +294,7 @@ def selection_api():
 @app.route("/log", methods=['GET'])
 def log_web():
     global logger
+    logger.debug("/log GET") 
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
     return (html_in + logger.generate_html_table() + html_out)
@@ -302,6 +303,7 @@ def log_web():
 @app.route("/selection_log", methods=['GET'])
 def selection_web():
     global selection_log
+    logger.debug("/selection_log GET") 
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
     return (html_in + selection_log.generate_html_table() + html_out)
@@ -309,6 +311,8 @@ def selection_web():
 # set up root route
 @app.route("/config", methods=['GET'])
 def config_web():
+    global max_intents
+    logger.debug("/config GET") 
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
     existing = f"<p>Existing maximum number of options: {max_intents}</p>"
@@ -323,8 +327,9 @@ def config_web():
 @app.route('/config', methods=['POST'])
 def config_submit():
     global max_intents
-
+    logger.debug("/config POST") 
     max_intents = int(request.form['selected_number'])
+    logger.debug("MAX_INTENTS = " + str(max_intents))
 
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
@@ -339,6 +344,7 @@ def config_submit():
 
 @app.route("/kill", methods=['GET'])
 def terminate_flask_server():
+    logger.debug("/kill GET") 
     os.kill(os.getpid(), 9)
 
 # Log some messages
