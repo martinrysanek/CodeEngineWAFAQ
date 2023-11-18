@@ -252,7 +252,7 @@ def selection_web():
 
 # set up root route
 @app.route("/log", methods=['GET'])
-def log():
+def log_api():
     global logger
     # Retrieve the log messages as a single string
     html_in = "<HTML><BODY>"
