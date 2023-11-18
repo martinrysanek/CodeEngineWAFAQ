@@ -8,20 +8,21 @@ import pandas as pd
 
 app = Flask(__name__)
 
-table_border_style=
-"""
+table_border_style="""
 <style>
     /* CSS styles */
     table {
         border-collapse: collapse;
-        width: 100%;
         border: 1px solid #ddd; /* Apply border to the whole table */
     }
 
     th, td {
         border: 1px solid #ddd; /* Apply border to cells */
-        padding: 8px;
+        padding-top: 0;
+        padding-bottom: 0;
         text-align: left;
+        padding-left: 12px; /* Left padding for data cells */
+        padding-right: 12px; /* Right padding for data cells */        
     }
 </style>
 """
@@ -48,14 +49,14 @@ class LoggerClass:
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
-        html_table = table_border_style + '<table"><tr"><th">Time</th><th">Type</th><th>Message</th></tr>'
+        html_table = '<table><tr><th>Time</th><th>Type</th><th>Message</th></tr>'
         for index, row in self.log.iterrows():
             datetime_str = row["datetime"]
             message = row["message"]
             level = row["level"]
             indent = row["indent"]
             while indent >0:
-                message += "&nbsp;&nbsp;" + message
+                message = "&nbsp;&nbsp;&nbsp;&nbsp;" + message
                 indent -= 1
             html_table += f'<tr><td>{datetime_str}</td><td>{level}</td><td>{message}</td></tr>'
         html_table += '</table>'
@@ -74,7 +75,7 @@ class SelectionLoggerClass:
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
-        html_table = table_border_style +'<table style="border: 1px solid #ddd;"><tr style="border: 1px solid #ddd;><th>Time</th><th>Query</th><th>Selected FAQ</th><th>Selected Conf</th><th>Top FAQ</th><th>Top Conf</th></tr>'
+        html_table = '<table"><tr><th>Time</th><th>Query</th><th>Selected FAQ</th><th>Selected Conf</th><th>Top FAQ</th><th>Top Conf</th></tr>'
         for index, row in self.log.iterrows():
             html_table += f'<tr><td>{row["datetime"]}</td><td>{row["query"]}</td><td>{row["selected_faq"]}</td><td>{row["selected_conf"]}</td><td>{row["top_faq"]}</td><td>{row["top_conf"]}</td></tr>'
         html_table += '</table>'
@@ -254,7 +255,7 @@ def selection_api():
 def log_api():
     global logger
     # Retrieve the log messages as a single string
-    html_in = "<HTML><BODY>"
+    html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>"
     html_out = "</BODY></HTML>"
     return (html_in + logger.generate_html_table() + html_out)
 
@@ -263,7 +264,7 @@ def log_api():
 def selection_web():
     global selection_log
     # Retrieve the log messages as a single string
-    html_in = "<HTML><BODY>"
+    html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>"
     html_out = "</BODY></HTML>"
     return (html_in + selection_log.generate_html_table() + html_out)
 
