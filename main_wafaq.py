@@ -58,6 +58,9 @@ config_form_begin="""
 config_form_end="""
     </select>
     <br><br>
+    <label for="toggle">FAQ stripping (True/False):</label>
+    <input type="checkbox" id="toggle" name="toggle_switch">    
+    <br><br>
     <input type="submit" value="Submit">
 </form>
 """
@@ -327,9 +330,13 @@ def config_web():
 @app.route('/config', methods=['POST'])
 def config_submit():
     global max_intents
+    global faq_stripping
     logger.debug("/config POST") 
     max_intents = int(request.form['selected_number'])
     logger.debug("MAX_INTENTS = " + str(max_intents))
+    faq_stripping_str = request.form['toggle_switch']
+    faq_stripping = (faq_stripping_str == "True" or faq_stripping_str == "1")
+    logger.debug("FAQ_STRIPPING = " + str(faq_stripping))
 
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
@@ -366,6 +373,10 @@ logger.debug("ASSISTANT_ID = " + assistant_id)
 max_intents_str = os.getenv('MAX_INTENTS', '5')
 max_intents = int(max_intents_str)
 logger.debug("MAX_INTENTS = " + str(max_intents))
+
+faq_stripping_str = os.getenv('FAQ_STRIPPING', 'True')
+faq_stripping = (faq_stripping_str == "True" or faq_stripping_str == "1")
+logger.debug("FAQ_STRIPPING = " + str(faq_stripping))
 
 # Initiate WA connection
 authenticator = None
