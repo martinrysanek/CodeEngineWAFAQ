@@ -1,31 +1,75 @@
 from flask import Flask, request, jsonify
 from ibm_watson import AssistantV2
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
-import datetime
-import xml.etree.ElementTree as ET
+from datetime import datetime
+# import xml.etree.ElementTree as ET
 import urllib.request
 import os
-import logging
+import pandas as pd
 
 app = Flask(__name__)
 
-class StringHandler(logging.Handler):
-    def __init__(self):
-        super().__init__()
-        self.log_output = ""
-
-    def emit(self, record):
-        log_message = self.format(record)
-        self.log_output += log_message + "\n"
-        
-class CustomFormatter(logging.Formatter):
-    def format(self, record):
-        # Get the current timestamp in a specific format
-        timestamp = self.formatTime(record, datefmt='%Y-%m-%d %H:%M:%S')
-        # custom_format = f"[{timestamp}] [{record.levelname}] {record.name}: {record.getMessage()}"
-        custom_format = f"[{timestamp}] [{record.levelname}]: {record.getMessage()} <BR>"
-        return custom_format
+class LoggerClass:
+    def __init__(self, name):
+        self.name = name
+        columns = ["datetime","level","message", "indent"]
+        self.log = pd.DataFrame(columns=columns)
     
+    def add_row(self, level, message, indent=0):
+        current_datetime = datetime.now()
+        current_datetime_str = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        self.log.loc[len(self.log.index)] = [current_datetime_str, level, message, indent]
+
+    def info(self, message, indent = 0):
+        self.add_row("info", message, indent)
+
+    def debug(self, message, indent = 0):
+        self.add_row("debug", message, indent)
+
+    def error(self, message, indent = 0):
+        self.add_row("error", message, indent)    
+
+    # Function to generate HTML table from DataFrame
+    def generate_html_table(self):
+        html_table = '<table border="1"><tr><th>Time</th><th>Type</th><th>Message</th></tr>'
+        for index, row in self.log.iterrows():
+            datetime_str = row["datetime"]
+            message = row["message"]
+            level = row["level"]
+            indent = row["indent"]
+            while indent >0:
+                message += "&nbsp;" + message
+                indent -= 1
+            html_table += f'<tr><td>{datetime_str}</td><td>{level}</td><td>{message}</td></tr>'
+        html_table += '</table>'
+        return html_table    
+
+class SelectionLoggerClass:
+    def __init__(self, name):
+        self.name = name
+        columns = ["datetime","query","selected_faq", "selected_conf", "top_faq", "top_conf"]
+        self.log = pd.DataFrame(columns=columns)
+    
+    def add_row(self, query,selected_faq, selected_conf, top_faq, top_conf):
+        current_datetime = datetime.now()
+        current_datetime_str = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        self.log.loc[len(self.log.index)] = [current_datetime_str, query,selected_faq, selected_conf, top_faq, top_conf]
+
+    # Function to generate HTML table from DataFrame
+    def generate_html_table(self):
+        html_table = '<table border="1"><tr><th>Time</th><th>Query</th><th>Selected FAQ</th><th>S.Confidence</th><th>Top FAQ</th><th>T.Confidence</th></tr>'
+        for index, row in self.log.iterrows():
+            datetime_str = row["datetime"]
+            message = row["message"]
+            level = row["level"]
+            indent = row["indent"]
+            html_table += f'<tr><td>{row["datetime"]}</td><td>{row["query"]}</td><td>{row["selected_faq"]}</td><td>{row["selected_conf"]}</td><td>{row["top_faq"]}</td><td>{row["top_conf"]}</td></tr>'
+        html_table += '</table>'
+        return html_table    
+
+logger = LoggerClass("LOG")
+selection_log  =  SelectionLoggerClass("SELECTION")
+
 def wa_login():
     global authenticator
     global assistant
@@ -79,11 +123,11 @@ def get_intent_text(intent_text):
 # set up root route
 @app.route("/log", methods=['GET'])
 def log():
-    global string_handler
+    global logger
     # Retrieve the log messages as a single string
     html_in = "<HTML><BODY>"
     html_out = "</BODY></HTML>"
-    return (html_in + string_handler.log_output + html_out)
+    return (html_in + logger.generate_html_table() + html_out)
 
 # set up root route
 @app.route("/query", methods=['POST'])
@@ -93,7 +137,7 @@ def query_api():
       global assistant_id
       global session_id  
       global assistant
-      global max_count 
+      global max_intents
       global authenticator
       
       logger.debug("/query POST")
@@ -195,10 +239,7 @@ def selection_api():
       else:
           top_confidence = -1   
       
-      current_datetime = datetime.datetime.now()
-      formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-      
-      selection_log += "{}, {}, {}, {:.3f}, {}, {:.3f}<BR>".format(formatted_datetime, query, selected_name, selected_confidence, top_name, top_confidence)
+      selection_log.add_row(query, selected_name, selected_confidence, top_name, top_confidence)
       logger.debug("/selection return") 
       return '',200
     except Exception as e:
@@ -211,25 +252,7 @@ def selection_web():
     # Retrieve the log messages as a single string
     html_in = "<HTML><BODY>"
     html_out = "</BODY></HTML>"
-    return (html_in + selection_log + html_out)
-
-# Configure logging with a custom log message format
-logging.basicConfig(
-    level=logging.DEBUG,  # Set the minimum log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'  # Format for the timestamp
-)
-
-# Create a logger
-logger = logging.getLogger(__name__)
-
-# Create a custom formatter
-custom_formatter = CustomFormatter()
-
-# Create a custom logging handler to capture log messages in a string
-string_handler = StringHandler()
-string_handler.setFormatter(custom_formatter)
-logger.addHandler(string_handler)
+    return (html_in + selection_log.generate_html_table() + html_out)
 
 # Log some messages
 logger.info("Custom Extension to get response from Watson Assistant")
@@ -250,9 +273,6 @@ logger.debug("ASSISTANT_ID = " + assistant_id)
 max_intents_str = os.getenv('MAX_INTENTS', '5')
 max_intents = int(max_intents_str)
 logger.debug("MAX_INTENTS = " + str(max_intents))
-
-# Initiate Selection Log
-selection_log =""
 
 # Initiate WA connection
 authenticator = None
