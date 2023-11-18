@@ -49,6 +49,19 @@ menu_html="""
 <br><br>
 """
 
+config_form_begin="""
+<form action="/config" method="post">
+    <label for="numbers">Select new maximum number of options (3 to 8):</label>
+    <select id="numbers" name="selected_number">
+"""
+
+config_form_end="""
+    </select>
+    <br><br>
+    <input type="submit" value="Submit">
+</form>
+"""
+
 class LoggerClass:
     def __init__(self, name):
         self.name = name
@@ -298,7 +311,31 @@ def selection_web():
 def config_web():
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
-    return (html_in + "MAX_INTENTS = " + str(max_intents) + html_out)
+    existing = f"<p>Existing maximum number of options: {max_intents}</p>"
+    message = ""
+    for i in range(3,9):
+        if i == max_intents:
+            message += f'<option value="{i}" selected>{i}</option>\n'
+        else:
+            message += f'<option value="{i}">{i}</option>\n'
+    return (html_in + existing + config_form_begin + message + config_form_end + html_out)
+
+@app.route('/config', methods=['POST'])
+def config_submit():
+    global max_intents
+
+    max_intents = int(request.form['selected_number'])
+
+    html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
+    html_out = "</BODY></HTML>"
+    existing = f"<p>Existing maximum number of options: {max_intents}</p>"
+    message = ""
+    for i in range(3,9):
+        if i == max_intents:
+            message += f'<option value="{i}" selected>{i}</option>\n'
+        else:
+            message += f'<option value="{i}">{i}</option>\n'
+    return (html_in + existing + config_form_begin + message + config_form_end + html_out)
 
 @app.route("/kill", methods=['GET'])
 def terminate_flask_server():
