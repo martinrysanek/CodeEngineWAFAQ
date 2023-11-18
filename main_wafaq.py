@@ -27,6 +27,13 @@ table_border_style="""
 </style>
 """
 
+menu_html="""
+<h1>WA FAQ Extension</h1>
+<button onclick="window.location.href = '/selection'">Faq Selections</button>
+<button onclick="window.location.href = '/log'">Faq Logs</button>
+<p>&nbsp;</p>
+"""
+
 class LoggerClass:
     def __init__(self, name):
         self.name = name
@@ -75,7 +82,7 @@ class SelectionLoggerClass:
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
-        html_table = '<table"><tr><th>Time</th><th>Query</th><th>Selected FAQ</th><th>Selected Conf</th><th>Top FAQ</th><th>Top Conf</th></tr>'
+        html_table = '<table><tr><th>Time</th><th>Query</th><th>Selected FAQ</th><th>Selected Conf</th><th>Top FAQ</th><th>Top Conf</th></tr>'
         for index, row in self.log.iterrows():
             html_table += f'<tr><td>{row["datetime"]}</td><td>{row["query"]}</td><td>{row["selected_faq"]}</td><td>{row["selected_conf"]}</td><td>{row["top_faq"]}</td><td>{row["top_conf"]}</td></tr>'
         html_table += '</table>'
@@ -254,8 +261,7 @@ def selection_api():
 @app.route("/log", methods=['GET'])
 def log_api():
     global logger
-    # Retrieve the log messages as a single string
-    html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>"
+    html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
     return (html_in + logger.generate_html_table() + html_out)
 
@@ -263,8 +269,7 @@ def log_api():
 @app.route("/selection_log", methods=['GET'])
 def selection_web():
     global selection_log
-    # Retrieve the log messages as a single string
-    html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>"
+    html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
     return (html_in + selection_log.generate_html_table() + html_out)
 
