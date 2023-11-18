@@ -229,6 +229,7 @@ def query_api():
                         if count<=max_intents:
                             intent_text = intent['intent']
                             if intent_text.startswith("fallback"):
+                                count-=1
                                 continue
                             logger.info("Query: intent " + intent_text)
                             out_text = get_intent_text(intent_text)
