@@ -20,7 +20,7 @@ class LoggerClass:
         self.log.loc[len(self.log.index)] = [current_datetime_str, level, message, indent]
 
     def info(self, message, indent = 0):
-        self.add_row("info", message, indent)
+        self.add_row("info", message, indent + 1)
 
     def debug(self, message, indent = 0):
         self.add_row("debug", message, indent)
@@ -30,14 +30,14 @@ class LoggerClass:
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
-        html_table = '<table border="1"><tr><th>Time</th><th>Type</th><th>Message</th></tr>'
+        html_table = '<table style="border: 1px solid #ddd;"><tr><th>Time</th><th>Type</th><th>Message</th></tr>'
         for index, row in self.log.iterrows():
             datetime_str = row["datetime"]
             message = row["message"]
             level = row["level"]
             indent = row["indent"]
             while indent >0:
-                message += "&nbsp;" + message
+                message += "&nbsp;&nbsp;" + message
                 indent -= 1
             html_table += f'<tr><td>{datetime_str}</td><td>{level}</td><td>{message}</td></tr>'
         html_table += '</table>'
@@ -56,7 +56,7 @@ class SelectionLoggerClass:
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
-        html_table = '<table border="1"><tr><th>Time</th><th>Query</th><th>Selected FAQ</th><th>S.Confidence</th><th>Top FAQ</th><th>T.Confidence</th></tr>'
+        html_table = '<table style="border: 1px solid #ddd;"><tr><th>Time</th><th>Query</th><th>Selected FAQ</th><th>Selected Conf</th><th>Top FAQ</th><th>Top Conf</th></tr>'
         for index, row in self.log.iterrows():
             html_table += f'<tr><td>{row["datetime"]}</td><td>{row["query"]}</td><td>{row["selected_faq"]}</td><td>{row["selected_conf"]}</td><td>{row["top_faq"]}</td><td>{row["top_conf"]}</td></tr>'
         html_table += '</table>'
@@ -232,6 +232,15 @@ def selection_api():
       return jsonify({"error": str(e)}), 400
 
 # set up root route
+@app.route("/log", methods=['GET'])
+def log_api():
+    global logger
+    # Retrieve the log messages as a single string
+    html_in = "<HTML><BODY>"
+    html_out = "</BODY></HTML>"
+    return (html_in + logger.generate_html_table() + html_out)
+
+# set up root route
 @app.route("/selection_log", methods=['GET'])
 def selection_web():
     global selection_log
@@ -243,15 +252,6 @@ def selection_web():
 @app.route("/kill", methods=['GET'])
 def terminate_flask_server():
     os.kill(os.getpid(), 9)
-
-# set up root route
-@app.route("/log", methods=['GET'])
-def log_api():
-    global logger
-    # Retrieve the log messages as a single string
-    html_in = "<HTML><BODY>"
-    html_out = "</BODY></HTML>"
-    return (html_in + logger.generate_html_table() + html_out)
 
 # Log some messages
 logger.info("Title: Custom Extension to get response from Watson Assistant started")
