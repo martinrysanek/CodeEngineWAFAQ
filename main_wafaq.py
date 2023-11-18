@@ -8,6 +8,24 @@ import pandas as pd
 
 app = Flask(__name__)
 
+table_border_style=
+"""
+<style>
+    /* CSS styles */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        border: 1px solid #ddd; /* Apply border to the whole table */
+    }
+
+    th, td {
+        border: 1px solid #ddd; /* Apply border to cells */
+        padding: 8px;
+        text-align: left;
+    }
+</style>
+"""
+
 class LoggerClass:
     def __init__(self, name):
         self.name = name
@@ -30,7 +48,7 @@ class LoggerClass:
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
-        html_table = '<table style="border: 1px solid #ddd;"><tr><th>Time</th><th>Type</th><th>Message</th></tr>'
+        html_table = table_border_style + '<table"><tr"><th">Time</th><th">Type</th><th>Message</th></tr>'
         for index, row in self.log.iterrows():
             datetime_str = row["datetime"]
             message = row["message"]
@@ -56,7 +74,7 @@ class SelectionLoggerClass:
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
-        html_table = '<table style="border: 1px solid #ddd;"><tr><th>Time</th><th>Query</th><th>Selected FAQ</th><th>Selected Conf</th><th>Top FAQ</th><th>Top Conf</th></tr>'
+        html_table = table_border_style +'<table style="border: 1px solid #ddd;"><tr style="border: 1px solid #ddd;><th>Time</th><th>Query</th><th>Selected FAQ</th><th>Selected Conf</th><th>Top FAQ</th><th>Top Conf</th></tr>'
         for index, row in self.log.iterrows():
             html_table += f'<tr><td>{row["datetime"]}</td><td>{row["query"]}</td><td>{row["selected_faq"]}</td><td>{row["selected_conf"]}</td><td>{row["top_faq"]}</td><td>{row["top_conf"]}</td></tr>'
         html_table += '</table>'
