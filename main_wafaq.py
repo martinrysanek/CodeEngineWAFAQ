@@ -249,6 +249,9 @@ def selection_web():
     html_out = "</BODY></HTML>"
     return (html_in + selection_log.generate_html_table() + html_out)
 
+@app.route("/kill", methods=['GET'])
+def terminate_flask_server():
+    os.kill(os.getpid(), 9)
 
 # set up root route
 @app.route("/log", methods=['GET'])
