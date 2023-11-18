@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from ibm_watson import AssistantV2
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from datetime import datetime
-# import xml.etree.ElementTree as ET
 import urllib.request
 import os
 import pandas as pd
@@ -31,7 +30,7 @@ class LoggerClass:
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
-        html_table = '<table border="1"><tr><th>Time</th><th>Type</th><th>Message</th></tr>'
+        html_table = '<table border="0"><tr><th>Time</th><th>Type</th><th>Message</th></tr>'
         for index, row in self.log.iterrows():
             datetime_str = row["datetime"]
             message = row["message"]
@@ -57,12 +56,8 @@ class SelectionLoggerClass:
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
-        html_table = '<table border="1"><tr><th>Time</th><th>Query</th><th>Selected FAQ</th><th>S.Confidence</th><th>Top FAQ</th><th>T.Confidence</th></tr>'
+        html_table = '<table border="0"><tr><th>Time</th><th>Query</th><th>Selected FAQ</th><th>S.Confidence</th><th>Top FAQ</th><th>T.Confidence</th></tr>'
         for index, row in self.log.iterrows():
-            datetime_str = row["datetime"]
-            message = row["message"]
-            level = row["level"]
-            indent = row["indent"]
             html_table += f'<tr><td>{row["datetime"]}</td><td>{row["query"]}</td><td>{row["selected_faq"]}</td><td>{row["selected_conf"]}</td><td>{row["top_faq"]}</td><td>{row["top_conf"]}</td></tr>'
         html_table += '</table>'
         return html_table    
@@ -254,8 +249,18 @@ def selection_web():
     html_out = "</BODY></HTML>"
     return (html_in + selection_log.generate_html_table() + html_out)
 
+
+# set up root route
+@app.route("/log", methods=['GET'])
+def log():
+    global logger
+    # Retrieve the log messages as a single string
+    html_in = "<HTML><BODY>"
+    html_out = "</BODY></HTML>"
+    return (html_in + logger.generate_html_table() + html_out)
+
 # Log some messages
-logger.info("Custom Extension to get response from Watson Assistant")
+logger.info("Title: Custom Extension to get response from Watson Assistant started")
 
 # Get the PORT from environment
 port = os.getenv('PORT', '8080')
