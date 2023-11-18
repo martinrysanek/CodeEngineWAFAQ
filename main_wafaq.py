@@ -186,6 +186,7 @@ def query_api():
       global session_id  
       global assistant
       global max_intents
+      global faq_stripping
       global authenticator
       
       logger.debug("/query POST")
@@ -231,6 +232,10 @@ def query_api():
                                 continue
                             logger.info("Query: intent " + intent_text)
                             out_text = get_intent_text(intent_text)
+                            if faq_stripping:
+                                if intent_text.startswith('FAQ-'):
+                                    intent_text = intent_text[len('FAQ-'):]  
+                                intent_text = intent_text.replace('_',' ')
                             new_item = {
                                 'intent': intent_text,
                                 'text':  out_text,
@@ -334,9 +339,10 @@ def config_submit():
     logger.debug("/config POST") 
     max_intents = int(request.form['selected_number'])
     logger.debug("MAX_INTENTS = " + str(max_intents))
-    faq_stripping_str = request.form['toggle_switch']
-    faq_stripping = (faq_stripping_str == "True" or faq_stripping_str == "1")
+    faq_stripping = ('toggle_switch' in request.form)
+    # faq_stripping = (faq_stripping_str == "on" or faq_stripping_str == "1" or faq_stripping_str == "True")
     logger.debug("FAQ_STRIPPING = " + str(faq_stripping))
+    # logger.debug("FAQ_STRIPPING_STR = " + faq_stripping_str)
 
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
