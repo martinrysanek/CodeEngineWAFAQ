@@ -232,12 +232,14 @@ def query_api():
                                 continue
                             logger.info("Query: intent " + intent_text)
                             out_text = get_intent_text(intent_text)
+                            intent_text_str = intent_text
                             if faq_stripping:
-                                if intent_text.startswith('FAQ-'):
-                                    intent_text = intent_text[len('FAQ-'):]  
-                                intent_text = intent_text.replace('_',' ')
+                                if intent_text_str.startswith('FAQ-'):
+                                    intent_text_str = intent_text_str[len('FAQ-'):]  
+                                intent_text_str = intent_text_str.replace('_',' ')
                             new_item = {
                                 'intent': intent_text,
+                                'intent_str': intent_text_str,
                                 'text':  out_text,
                                 'confidence' : intent['confidence']
                             }
