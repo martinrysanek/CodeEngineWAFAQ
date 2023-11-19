@@ -55,15 +55,19 @@ config_form_begin="""
     <select id="numbers" name="selected_number">
 """
 
-config_form_end="""
+config_form_middle="""
     </select>
     <br><br>
     <label for="toggle">FAQ stripping (True/False):</label>
-    <input type="checkbox" id="toggle" name="toggle_switch">    
+    <input type="checkbox" id="toggle" name="toggle_switch"    
+"""
+
+config_form_end=""">    
     <br><br>
     <input type="submit" value="Submit">
 </form>
 """
+
 
 class LoggerClass:
     def __init__(self, name):
@@ -323,6 +327,7 @@ def selection_web():
 @app.route("/config", methods=['GET'])
 def config_web():
     global max_intents
+    global faq_stripping
     logger.debug("/config GET") 
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
@@ -333,7 +338,9 @@ def config_web():
             message += f'<option value="{i}" selected>{i}</option>\n'
         else:
             message += f'<option value="{i}">{i}</option>\n'
-    return (html_in + existing + config_form_begin + message + config_form_end + html_out)
+
+    toggle_message = " checked" if faq_stripping else " "
+    return (html_in + existing + config_form_begin + message + config_form_middle + toggle_message + config_form_end + html_out)
 
 @app.route('/config', methods=['POST'])
 def config_submit():
@@ -351,12 +358,13 @@ def config_submit():
     html_out = "</BODY></HTML>"
     existing = f"<p>Existing maximum number of options: {max_intents}</p>"
     message = ""
-    for i in range(3,9):
+    for i in range(2,9):
         if i == max_intents:
             message += f'<option value="{i}" selected>{i}</option>\n'
         else:
             message += f'<option value="{i}">{i}</option>\n'
-    return (html_in + existing + config_form_begin + message + config_form_end + html_out)
+    toggle_message = " checked" if faq_stripping else " "
+    return (html_in + existing + config_form_begin + message + config_form_middle + toggle_message + config_form_end + html_out)
 
 @app.route("/kill", methods=['GET'])
 def terminate_flask_server():
