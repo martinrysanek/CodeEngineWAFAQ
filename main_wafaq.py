@@ -333,7 +333,7 @@ def config_web():
     html_out = "</BODY></HTML>"
     existing = f"<p>Existing maximum number of options: {max_intents}</p>"
     message = ""
-    for i in range(3,9):
+    for i in range(2,9):
         if i == max_intents:
             message += f'<option value="{i}" selected>{i}</option>\n'
         else:
