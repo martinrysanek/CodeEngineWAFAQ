@@ -181,7 +181,6 @@ def get_intent_text(intent_text):
           logger.error("get_intent_text: Wa did not get text for intent")
           return ("Error: get_intent_text: Wa did not get text for intent")
 
-# set up root route
 @app.route("/query", methods=['POST'])
 def query_api():
   try:
@@ -264,7 +263,6 @@ def query_api():
   except Exception as e:
       return jsonify({"error": str(e)}), 400
 
-# set up root route
 @app.route("/selection", methods=['POST'])
 def selection_api():
     global logger  
@@ -305,7 +303,7 @@ def selection_api():
     except Exception as e:
       return jsonify({"error": str(e)}), 400
 
-# set up root route
+@app.route("/", methods=['GET'])
 @app.route("/log", methods=['GET'])
 def log_web():
     global logger
@@ -314,7 +312,6 @@ def log_web():
     html_out = "</BODY></HTML>"
     return (html_in + logger.generate_html_table() + html_out)
 
-# set up root route
 @app.route("/selection_log", methods=['GET'])
 def selection_web():
     global selection_log
@@ -323,7 +320,6 @@ def selection_web():
     html_out = "</BODY></HTML>"
     return (html_in + selection_log.generate_html_table() + html_out)
 
-# set up root route
 @app.route("/config", methods=['GET'])
 def config_web():
     global max_intents
@@ -379,23 +375,22 @@ port = os.getenv('PORT', '8080')
 # Get authenticate key
 api_key = os.getenv('API_KEY', 'None')
 logger.debug("API_KEY = " + api_key)
-# Get authenticate key
+# Get authenticate url
 wa_url = os.getenv('WA_URL', 'None')
 logger.debug("WA_URL = " + wa_url)
 # Get assistant_id
 assistant_id = os.getenv('ASSISTANT_ID', 'None')
 logger.debug("ASSISTANT_ID = " + assistant_id)
-
 # Max Returned Intents
 max_intents_str = os.getenv('MAX_INTENTS', '5')
 max_intents = int(max_intents_str)
 logger.debug("MAX_INTENTS = " + str(max_intents))
-
+# FAQ stripping
 faq_stripping_str = os.getenv('FAQ_STRIPPING', 'True')
 faq_stripping = (faq_stripping_str == "True" or faq_stripping_str == "1")
 logger.debug("FAQ_STRIPPING = " + str(faq_stripping))
 
-# Initiate WA connection
+# Initiate WA connection (none)
 authenticator = None
 assistant = None
 
