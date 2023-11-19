@@ -348,10 +348,10 @@ def config_submit():
     global faq_stripping
     logger.debug("/config POST") 
     max_intents = int(request.form['selected_number'])
-    logger.debug("MAX_INTENTS = " + str(max_intents))
+    logger.info("MAX_INTENTS = " + str(max_intents))
     faq_stripping = ('toggle_switch' in request.form)
     # faq_stripping = (faq_stripping_str == "on" or faq_stripping_str == "1" or faq_stripping_str == "True")
-    logger.debug("FAQ_STRIPPING = " + str(faq_stripping))
+    logger.info("FAQ_STRIPPING = " + str(faq_stripping))
     # logger.debug("FAQ_STRIPPING_STR = " + faq_stripping_str)
 
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
