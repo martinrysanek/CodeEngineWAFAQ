@@ -218,7 +218,7 @@ def query_api():
                       'message_type': 'text',
                       'text': query,
                       "options": {
-                      "alternate_intents": True        
+                            "alternate_intents": True,
                       }
                   }
                 )
