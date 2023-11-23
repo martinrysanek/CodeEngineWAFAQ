@@ -8,7 +8,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-table_border_style="""
+table_border_style = """
 <style>
     /* CSS styles */
     h1    {
@@ -41,7 +41,7 @@ table_border_style="""
 </style>
 """
 
-menu_html="""
+menu_html = """
 <h1>Watson Assistant FAQ Extension</h1>
 <button onclick="window.location.href = '/selection_log'">&nbsp;Faq Selections&nbsp;</button>&nbsp;&nbsp;
 <button onclick="window.location.href = '/log'">&nbsp;Faq Logs&nbsp;</button>&nbsp;&nbsp;
@@ -49,20 +49,20 @@ menu_html="""
 <br><br>
 """
 
-config_form_begin="""
+config_form_begin = """
 <form action="/config" method="post">
     <label for="numbers">Select new maximum number of options (3 to 8):</label>
     <select id="numbers" name="selected_number">
 """
 
-config_form_middle="""
+config_form_middle = """
     </select>
     <br><br>
     <label for="toggle">FAQ stripping (True/False):</label>
     <input type="checkbox" id="toggle" name="toggle_switch"    
 """
 
-config_form_end=""">    
+config_form_end = """>    
     <br><br>
     <input type="submit" value="Submit">
 </form>
@@ -72,22 +72,23 @@ config_form_end=""">
 class LoggerClass:
     def __init__(self, name):
         self.name = name
-        columns = ["datetime","level","message", "indent"]
+        columns = ["datetime", "level", "message", "indent"]
         self.log = pd.DataFrame(columns=columns)
-    
+
     def add_row(self, level, message, indent=0):
         current_datetime = datetime.now()
         current_datetime_str = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        self.log.loc[len(self.log.index)] = [current_datetime_str, level, message, indent]
+        self.log.loc[len(self.log.index)] = [
+            current_datetime_str, level, message, indent]
 
-    def info(self, message, indent = 0):
+    def info(self, message, indent=0):
         self.add_row("info", message, indent + 1)
 
-    def debug(self, message, indent = 0):
+    def debug(self, message, indent=0):
         self.add_row("debug", message, indent)
 
-    def error(self, message, indent = 0):
-        self.add_row("error", message, indent)    
+    def error(self, message, indent=0):
+        self.add_row("error", message, indent)
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
@@ -97,7 +98,7 @@ class LoggerClass:
             message = row["message"]
             level = row["level"]
             indent = row["indent"]
-            while indent >0:
+            while indent > 0:
                 message = "&nbsp;&nbsp;&nbsp;&nbsp;" + message
                 indent -= 1
             if level == "info":
@@ -107,18 +108,21 @@ class LoggerClass:
             else:
                 html_table += f'<tr><td>{datetime_str}</td><td>{level}</td><td>{message}</td></tr>'
         html_table += '</table>'
-        return html_table    
+        return html_table
+
 
 class SelectionLoggerClass:
     def __init__(self, name):
         self.name = name
-        columns = ["datetime","query","selected_faq", "selected_conf", "top_faq", "top_conf"]
+        columns = ["datetime", "query", "selected_faq",
+                   "selected_conf", "top_faq", "top_conf"]
         self.log = pd.DataFrame(columns=columns)
-    
-    def add_row(self, query,selected_faq, selected_conf, top_faq, top_conf):
+
+    def add_row(self, query, selected_faq, selected_conf, top_faq, top_conf):
         current_datetime = datetime.now()
         current_datetime_str = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-        self.log.loc[len(self.log.index)] = [current_datetime_str, query,selected_faq, selected_conf, top_faq, top_conf]
+        self.log.loc[len(self.log.index)] = [current_datetime_str,
+                                             query, selected_faq, selected_conf, top_faq, top_conf]
 
     # Function to generate HTML table from DataFrame
     def generate_html_table(self):
@@ -126,10 +130,12 @@ class SelectionLoggerClass:
         for index, row in self.log.iterrows():
             html_table += f'<tr><td>{row["datetime"]}</td><td>{row["query"]}</td><td>{row["selected_faq"]}</td><td>{row["selected_conf"]}</td><td>{row["top_faq"]}</td><td>{row["top_conf"]}</td></tr>'
         html_table += '</table>'
-        return html_table    
+        return html_table
+
 
 logger = LoggerClass("LOG")
-selection_log  =  SelectionLoggerClass("SELECTION")
+selection_log = SelectionLoggerClass("SELECTION")
+
 
 def wa_login():
     global authenticator
@@ -146,81 +152,84 @@ def wa_login():
         authenticator=authenticator)
     assistant.set_service_url(wa_url)
     session = assistant.create_session(assistant_id).get_result()
-    session_id=session['session_id']
+    session_id = session['session_id']
     logger.debug("wa_login() new wa session " + session_id)
 
+
 def get_intent_text(intent_text):
-      global logger  
-      global assistant_id
-      global session_id  
-      global assistant
-      
-      result = assistant.message(
-          assistant_id=assistant_id,
-          session_id=session_id,
-          input={
-              'message_type': 'text',
-              'text': '*',
-              "intents": [
-                  {
-                      "intent": intent_text,
-                      "confidence": 1
-                  }
-              ]
-          }
-      )
-      if result.status_code == 200:
-          response = result.get_result()
-          if 'generic' in response['output']:
-              #It is not random way to return text, for random need to be adjusted !!!
-              return (response['output']['generic'][0]['text'])
-          else:
-              logger.error("get_intent_text: Return json does not include generic and text")
-              return ("Error: get_intent_text: Return json does not include generic and text")
-      else:
-          logger.error("get_intent_text: Wa did not get text for intent")
-          return ("Error: get_intent_text: Wa did not get text for intent")
+    global logger
+    global assistant_id
+    global session_id
+    global assistant
+
+    result = assistant.message(
+        assistant_id=assistant_id,
+        session_id=session_id,
+        input={
+            'message_type': 'text',
+            'text': '*',
+            "intents": [
+                {
+                    "intent": intent_text,
+                    "confidence": 1
+                }
+            ]
+        }
+    )
+    if result.status_code == 200:
+        response = result.get_result()
+        if 'generic' in response['output']:
+            # It is not random way to return text, for random need to be adjusted !!!
+            return (response['output']['generic'][0]['text'])
+        else:
+            logger.error(
+                "get_intent_text: Return json does not include generic and text")
+            return ("Error: get_intent_text: Return json does not include generic and text")
+    else:
+        logger.error("get_intent_text: Wa did not get text for intent")
+        return ("Error: get_intent_text: Wa did not get text for intent")
+
 
 @app.route("/query", methods=['POST'])
 def query_api():
-  try:
-      global logger  
-      global assistant_id
-      global session_id  
-      global assistant
-      global max_intents
-      global faq_stripping
-      global authenticator
-      
-      logger.debug("/query POST")
-      request_data = request.get_json()
-      if 'query' not in request_data:
-          logger.error("Query: missing query parameter")
-          return jsonify({"error": "Missing 'query' parameter"}), 400
-      query = request_data['query']
-      if not (type(query) is str):
-          logger.error("Query: Wrong parameter type: " + type(query))
-          return jsonify({"error": "Wrong 'query' parameter type"}), 400
-      else:
-          logger.info("Query: parameter: " + query)
-          
-      #Create WA session if it is not opened yet
+    try:
+        global logger
+        global assistant_id
+        global session_id
+        global assistant
+        global max_intents
+        global faq_stripping
+        global authenticator
 
-      while (True):
-          try:
+        logger.debug("/query POST")
+        request_data = request.get_json()
+        if 'query' not in request_data:
+            logger.error("Query: missing query parameter")
+            return jsonify({"error": "Missing 'query' parameter"}), 400
+        query = request_data['query']
+        if not (type(query) is str):
+            logger.error("Query: Wrong parameter type: " + type(query))
+            return jsonify({"error": "Wrong 'query' parameter type"}), 400
+        else:
+            logger.info("Query: parameter: " + query)
+
+        # Create WA session if it is not opened yet
+
+        while (True):
+            try:
                 if not authenticator:
                     wa_login()
-                #Get Intents for Query
+                # Get Intents for Query
                 result = assistant.message(
-                  assistant_id=assistant_id,
-                  session_id=session_id,
-                  input={
-                      'message_type': 'text',
-                      'text': query,
-                      "options": {
+                    assistant_id=assistant_id,
+                    session_id=session_id,
+                    input={
+                        'message_type': 'text',
+                        'text': query,
+                        "options": {
                             "alternate_intents": True,
-                      }
-                  }
+                        }
+                    }
                 )
                 response = result.get_result()
                 if result.status_code == 200 and 'intents' in response["output"]:
@@ -228,113 +237,122 @@ def query_api():
                     intents = response["output"]['intents']
                     count = 0
                     for intent in intents:
-                        count+=1
-                        if count<=max_intents:
+                        count += 1
+                        if count <= max_intents:
                             intent_text = intent['intent']
                             if intent_text.startswith("fallback"):
-                                count-=1
+                                count -= 1
                                 continue
-                            logger.info("Query: intent " + intent_text + " C:" + str(intent['confidence']))
+                            logger.info("Query: intent " + intent_text +
+                                        " C:" + str(intent['confidence']))
                             out_text = get_intent_text(intent_text)
                             intent_text_str = intent_text
                             if faq_stripping:
                                 if intent_text_str.startswith('FAQ-'):
-                                    intent_text_str = intent_text_str[len('FAQ-'):]  
-                                intent_text_str = intent_text_str.replace('_',' ')
+                                    intent_text_str = intent_text_str[len(
+                                        'FAQ-'):]
+                                intent_text_str = intent_text_str.replace(
+                                    '_', ' ')
 
                                 words = intent_text_str.split()
-                                capitalized_words = [word.capitalize() for word in words]
+                                capitalized_words = [
+                                    word.capitalize() for word in words]
                                 intent_text_str = " ".join(capitalized_words)
 
                             new_item = {
                                 'intent': intent_text,
                                 'intent_str': intent_text_str,
                                 'text':  out_text,
-                                'confidence' : intent['confidence']
+                                'confidence': intent['confidence']
                             }
-                            response_data.append(new_item)          
+                            response_data.append(new_item)
                     logger.debug("/query return")
                     return jsonify(response_data)
                 else:
                     logger.error("Query: Wa reponded with error")
-                    return jsonify({"error": "Wa reponded with error"}), 400    
-          except Exception as e:
-              if hasattr(e, "code"):
-                  if e.code == 404:
-                     authenticator = None
-                     continue
-              authenticator = None
-              return jsonify({"error": str(e)}), 400
-  except Exception as e:
-      return jsonify({"error": str(e)}), 400
+                    return jsonify({"error": "Wa reponded with error"}), 400
+            except Exception as e:
+                if hasattr(e, "code"):
+                    if e.code == 404:
+                        authenticator = None
+                        continue
+                authenticator = None
+                return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 
 @app.route("/selection", methods=['POST'])
 def selection_api():
-    global logger  
+    global logger
     global selection_log
     try:
-      logger.debug("/selection POST")        
-      request_data = request.get_json()
-      if 'query' not in request_data:
-          logger.error("Selection: missing query parameter")
-          return jsonify({"error": "Missing 'query' parameter"}), 400    
-      else:
-          query = request_data['query']
-          logger.info("Selection query: " + query)
-      if 'selected_name' not in request_data:
-          logger.error("Selection: missing selected_name parameter")
-          return jsonify({"error": "Missing 'selected_name' parameter"}), 400  
-      else:
-          selected_name = request_data['selected_name']
-          logger.info("Selection selected: " + selected_name)          
-      if 'selected_confidence' not in request_data:
-          logger.error("Selection: missing selected_confidence parameter")
-          return jsonify({"error": "Missing 'selected_confidence' parameter"}), 400 
-      else:
-          selected_confidence = request_data['selected_confidence']
-          logger.info("Selection confidence: " + str(selected_confidence))          
-      if 'top_name' in request_data:
-          top_name = request_data['top_name']
-      else:
-          top_name = ""
-      if 'top_confidence' in request_data:
-          top_confidence = request_data['top_confidence']
-      else:
-          top_confidence = -1   
-      
-      selection_log.add_row(query, selected_name, selected_confidence, top_name, top_confidence)
-      logger.debug("/selection return") 
-      return '',200
+        logger.debug("/selection POST")
+        request_data = request.get_json()
+        if 'query' not in request_data:
+            logger.error("Selection: missing query parameter")
+            return jsonify({"error": "Missing 'query' parameter"}), 400
+        else:
+            query = request_data['query']
+            logger.info("Selection query: " + query)
+        if 'selected_name' not in request_data:
+            logger.error("Selection: missing selected_name parameter")
+            return jsonify({"error": "Missing 'selected_name' parameter"}), 400
+        else:
+            selected_name = request_data['selected_name']
+            logger.info("Selection selected: " + selected_name)
+        if 'selected_confidence' not in request_data:
+            logger.error("Selection: missing selected_confidence parameter")
+            return jsonify({"error": "Missing 'selected_confidence' parameter"}), 400
+        else:
+            selected_confidence = request_data['selected_confidence']
+            logger.info("Selection confidence: " + str(selected_confidence))
+        if 'top_name' in request_data:
+            top_name = request_data['top_name']
+        else:
+            top_name = ""
+        if 'top_confidence' in request_data:
+            top_confidence = request_data['top_confidence']
+        else:
+            top_confidence = -1
+
+        selection_log.add_row(query, selected_name,
+                              selected_confidence, top_name, top_confidence)
+        logger.debug("/selection return")
+        return '', 200
     except Exception as e:
-      return jsonify({"error": str(e)}), 400
+        return jsonify({"error": str(e)}), 400
+
 
 @app.route("/", methods=['GET'])
 @app.route("/log", methods=['GET'])
 def log_web():
     global logger
-    logger.debug("/log GET") 
+    logger.debug("/log GET")
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
     return (html_in + logger.generate_html_table() + html_out)
 
+
 @app.route("/selection_log", methods=['GET'])
 def selection_web():
     global selection_log
-    logger.debug("/selection_log GET") 
+    logger.debug("/selection_log GET")
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
     return (html_in + selection_log.generate_html_table() + html_out)
+
 
 @app.route("/config", methods=['GET'])
 def config_web():
     global max_intents
     global faq_stripping
-    logger.debug("/config GET") 
+    logger.debug("/config GET")
     html_in = "<HTML><HEAD>" + table_border_style + "</HEAD><BODY>" + menu_html
     html_out = "</BODY></HTML>"
     existing = f"<p>Existing maximum number of options: {max_intents}</p>"
     message = ""
-    for i in range(2,9):
+    for i in range(2, 9):
         if i == max_intents:
             message += f'<option value="{i}" selected>{i}</option>\n'
         else:
@@ -343,11 +361,12 @@ def config_web():
     toggle_message = " checked" if faq_stripping else " "
     return (html_in + existing + config_form_begin + message + config_form_middle + toggle_message + config_form_end + html_out)
 
+
 @app.route('/config', methods=['POST'])
 def config_submit():
     global max_intents
     global faq_stripping
-    logger.debug("/config POST") 
+    logger.debug("/config POST")
     max_intents = int(request.form['selected_number'])
     logger.info("MAX_INTENTS = " + str(max_intents))
     faq_stripping = ('toggle_switch' in request.form)
@@ -359,7 +378,7 @@ def config_submit():
     html_out = "</BODY></HTML>"
     existing = f"<p>Existing maximum number of options: {max_intents}</p>"
     message = ""
-    for i in range(2,9):
+    for i in range(2, 9):
         if i == max_intents:
             message += f'<option value="{i}" selected>{i}</option>\n'
         else:
@@ -367,13 +386,16 @@ def config_submit():
     toggle_message = " checked" if faq_stripping else " "
     return (html_in + existing + config_form_begin + message + config_form_middle + toggle_message + config_form_end + html_out)
 
+
 @app.route("/kill", methods=['GET'])
 def terminate_flask_server():
-    logger.debug("/kill GET") 
+    logger.debug("/kill GET")
     os.kill(os.getpid(), 9)
 
+
 # Log some messages
-logger.info("Title: Custom Extension to get response from Watson Assistant started")
+logger.info(
+    "Title: Custom Extension to get response from Watson Assistant started")
 
 # Get the PORT from environment
 port = os.getenv('PORT', '8080')
@@ -400,4 +422,4 @@ authenticator = None
 assistant = None
 
 if __name__ == "__main__":
-	app.run(host='0.0.0.0',port=int(port))
+    app.run(host='0.0.0.0', port=int(port))
