@@ -241,6 +241,11 @@ def query_api():
                                 if intent_text_str.startswith('FAQ-'):
                                     intent_text_str = intent_text_str[len('FAQ-'):]  
                                 intent_text_str = intent_text_str.replace('_',' ')
+
+                                words = intent_text_str.split()
+                                capitalized_words = [word.capitalize() for word in words]
+                                intent_text_str = " ".join(capitalized_words)
+
                             new_item = {
                                 'intent': intent_text,
                                 'intent_str': intent_text_str,
