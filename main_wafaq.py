@@ -234,7 +234,7 @@ def query_api():
                             if intent_text.startswith("fallback"):
                                 count-=1
                                 continue
-                            logger.info("Query: intent " + intent_text)
+                            logger.info("Query: intent " + intent_text + " C:" + str(intent['confidence']))
                             out_text = get_intent_text(intent_text)
                             intent_text_str = intent_text
                             if faq_stripping:
