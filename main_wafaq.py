@@ -255,11 +255,11 @@ def query_api():
                                     '_', ' ')
 
                                 words = intent_text_str.split()
-                                for i in range(len(words)):
-                                    if words[i] == 'Ibm':
-                                        words[i] = 'IBM'
                                 capitalized_words = [
                                     word.capitalize() for word in words]
+                                for i in range(len(word_list)):
+                                    if word_list[i].lower() == 'ibm':
+                                        word_list[i] = 'IBM'                                  
                                 intent_text_str = " ".join(capitalized_words)
 
                             new_item = {
