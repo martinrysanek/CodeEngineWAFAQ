@@ -257,9 +257,9 @@ def query_api():
                                 words = intent_text_str.split()
                                 capitalized_words = [
                                     word.capitalize() for word in words]
-                                for i in range(len(word)):
-                                    if word[i].lower() == 'ibm':
-                                        word[i] = 'IBM'                                  
+                                for i in range(len(words)):
+                                    if words[i].lower() == 'ibm':
+                                        words[i] = 'IBM'                                  
                                 intent_text_str = " ".join(capitalized_words)
 
                             new_item = {
